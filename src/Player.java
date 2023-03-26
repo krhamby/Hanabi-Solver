@@ -49,7 +49,7 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourDiscard(Card discard, Board boardState) {
-		// TODO: maybe update myHand? -- we may do this is ask()
+		// TODO: maybe update myHand? -- we may do this in ask()
 		this.discardPile.add(discard);
 	}
 	
