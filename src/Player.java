@@ -1,4 +1,7 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -336,9 +339,19 @@ public class Player {
 	}
 
 	private boolean colorIsMoreHelpful() throws Exception {
-		Random rand = new Random();
-		int i = rand.nextInt(2);
-		if (i == 0) {
+		// Random rand = new Random();
+		// int i = rand.nextInt(2);
+		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
+		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
+		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+			Card c = this.truePartnerHand.get(i);
+			values.set(c.value-1, values.get(c.value-1) + 1);
+			colors.set(c.color, values.get(c.color) + 1);
+		}
+		System.out.println(colors);
+		System.out.println(values);
+		System.out.println(Collections.max(colors) > Collections.max(values));
+		if(Collections.max(colors) > Collections.max(values)) {
 			return true;
 		} else {
 			return false;
