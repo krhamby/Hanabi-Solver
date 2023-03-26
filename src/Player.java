@@ -121,7 +121,6 @@ public class Player {
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex, Hand finalHand,
 			boolean wasLegalPlay, Board boardState) throws Exception {
 		// update what we think our partner knows about their own hand
-		// TODO: this causes an error because we do not update the partner's knowledge base somewhere
 		this.partner.hand.remove(playIndex);
 		this.partner.hand.add(drawIndex, new Card(-1, -1));
 
@@ -231,12 +230,25 @@ public class Player {
 		this.numHints = boardState.numHints;
 		this.numFuses = boardState.numFuses;
 
-		if (this.numHints == 1 && !this.canConfidentlyPlay()) {
+		if (this.numHints == 0 && !this.canConfidentlyPlay()) {
 			int idx = this.getDiscardIndex();
 			return "DISCARD " + idx + " " + idx;
 		} else if (canConfidentlyPlay()) {
 			int idx = this.getConfidentPlayIndex();
 			return "PLAY " + idx + " " + idx;
+		} else if (partnerCanConfidentlyPlay()) {
+			int idx = this.getPartnerConfidentPlayIndex();
+			Card c = this.partner.hand.get(idx);
+			if (c.color == -1) {
+				int color = this.getMostHelpfulColor();
+				this.partner.updateHandColorKnowledge(color, partnerHand);
+				return "COLORHINT " + color;
+			} else {
+				int number = this.getMostHelpfulNumber();
+				this.partner.updateHandValueKnowledge(number - 1, partnerHand);
+				return "NUMBERHINT " + number;
+			}
+
 		} else if (canPlayOne() && this.numFuses > 1) {
 			int idx = this.getPlayOneIndex();
 			return "PLAY " + idx + " " + idx;
@@ -350,23 +362,51 @@ public class Player {
 
 	// basic method to get the game running
 	private int getDiscardIndex() throws Exception {
-		// TODO: add logic for a card that we know is not playable since it makes the most sense to discard it before anything else
-
 		for (int i = 0; i < this.myHand.size(); i++) {
 			Card c = this.myHand.get(i);
-			if (c.color == -1 && c.value == -1) {
+			if (!this.cardIsPlayable(c)) { // TODO: idk that this does anything
 				return i;
-			}
-		}
-
-		for (int i = 0; i < this.myHand.size(); i++) {
-			Card c = this.myHand.get(i);
-			if (c.color == -1 || c.value == -1) {
+			} else if (c.color == -1 && c.value == -1) {
 				return i;
-			}
+			} else if (c.color == -1 || c.value == -1) {
+				return i;
+			} 
 		}
 
 		return 0;
+	}
+
+	private boolean cardIsPlayable(Card c) throws Exception {
+		switch (c.color) {
+			case 0:
+				if (this.tableau.get(0) == c.value - 1) {
+					return true;
+				}
+				break;
+			case 1:
+				if (this.tableau.get(1) == c.value - 1) {
+					return true;
+				}
+				break;
+			case 2:
+				if (this.tableau.get(2) == c.value - 1) {
+					return true;
+				}
+				break;
+			case 3:
+				if (this.tableau.get(3) == c.value - 1) {
+					return true;
+				}
+				break;
+			case 4:
+				if (this.tableau.get(4) == c.value - 1) {
+					return true;
+				}
+				break;
+			default:
+				break;
+		}
+		return false;
 	}
 
 	private boolean colorIsMoreHelpful() throws Exception {
@@ -413,5 +453,25 @@ public class Player {
 		}
 
 		return values.indexOf(Collections.max(values)) + 1;
+	}
+
+	private boolean partnerCanConfidentlyPlay() throws Exception {
+		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+			Card c = this.truePartnerHand.get(i);
+			if (this.cardIsPlayable(c) && (this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private int getPartnerConfidentPlayIndex() throws Exception {
+		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+			Card c = this.truePartnerHand.get(i);
+			if (this.cardIsPlayable(c) && (this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1)) {
+				return i;
+			}
+		}
+		return 0; // should never get here since we check if we can confidently play before calling this method
 	}
 }
