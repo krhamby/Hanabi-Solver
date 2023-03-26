@@ -13,16 +13,17 @@ public class Player {
 	// knowledge about hands
 	private Hand myHand;
 	private Hand truePartnerHand;
-	private Hand imperfectPartnerHand;
 
 	// knowledge about the board
 	private int numHints;
 	private int numFuses;
 	private ArrayList<Card> possibleRemainingCards;
-	private ArrayList<Card> partnerPossibleRemainingCards;
 	private ArrayList<Integer> tableau;
 	private ArrayList<Card> discardPile;
-	
+
+	// partner's imperfect knowledge
+	private PartnerKnowledge partner;
+
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
 	
@@ -33,7 +34,6 @@ public class Player {
 		// initialize our hand knowledge
 		this.myHand = new Hand();
 		this.truePartnerHand = new Hand();
-		this.imperfectPartnerHand = new Hand();
 
 		// initialize our board knowledge
 		this.numHints = 8;
@@ -50,12 +50,14 @@ public class Player {
 				}
 			}
 		}
-		this.partnerPossibleRemainingCards = new ArrayList<Card>(this.possibleRemainingCards);
 		this.tableau = new ArrayList<Integer>();
 		for (int i = 0; i < 5; i++) {
 			this.tableau.add(0);
 		}
 		this.discardPile = new ArrayList<Card>();
+
+		// initialize partner's knowledge
+		this.partner = new PartnerKnowledge();
 	}
 	
 	/**
@@ -105,11 +107,11 @@ public class Player {
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex, Hand finalHand,
 			boolean wasLegalPlay, Board boardState) throws Exception {
 		// update what we think our partner knows about their own hand
-		this.imperfectPartnerHand.remove(playIndex);
-		this.imperfectPartnerHand.add(drawIndex, new Card(-1, -1));
+		this.partner.hand.remove(playIndex);
+		this.partner.hand.add(drawIndex, new Card(-1, -1));
 
 		// update what we think our partner knows about the board
-		this.partnerPossibleRemainingCards.remove(play);
+		this.partner.possibleRemainingCards.remove(play);
 
 		// update what we know about our partner's hand
 		this.truePartnerHand = finalHand;
@@ -141,7 +143,9 @@ public class Player {
 	 * @param boardState The state of the board after the hint.
 	 */
 	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
-		
+		// update what we know about our partner's hand
+		this.truePartnerHand = partnerHand;
+
 	}
 	
 	/**
