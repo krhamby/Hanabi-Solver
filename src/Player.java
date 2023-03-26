@@ -9,6 +9,9 @@ import java.util.Scanner;
 public class Player {
 	// Add whatever variables you want. You MAY NOT use static variables, or otherwise allow direct communication between
 	// different instances of this class by any means; doing so will result in a score of 0.
+	private Hand myHand;
+	private Hand partnerHand;
+	private ArrayList<Card> discardPile;
 	
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
@@ -17,7 +20,11 @@ public class Player {
 	 * This default constructor should be the only constructor you supply.
 	 */
 	public Player() {
-		
+		// since we do not know anything about the state of the game until ask() is called,
+		// we will initialize empty states for our hands and discard pile
+		this.myHand = new Hand();
+		this.partnerHand = new Hand();
+		this.discardPile = new ArrayList<Card>();
 	}
 	
 	/**
@@ -32,7 +39,8 @@ public class Player {
 	 */
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
 			Hand finalHand, Board boardState) {
-		
+		this.discardPile.add(discard);
+		this.partnerHand = finalHand;
 	}
 	
 	/**
@@ -41,7 +49,8 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourDiscard(Card discard, Board boardState) {
-		
+		// TODO: maybe update myHand? -- we may do this is ask()
+		this.discardPile.add(discard);
 	}
 	
 	/**
