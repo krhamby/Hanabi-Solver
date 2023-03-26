@@ -26,4 +26,30 @@ class PartnerKnowledge {
             }
         }
     }
+
+    public void updateHandColorKnowledge(int color, Hand truePartnerHand) {
+        for (int i = 0; i < truePartnerHand.size(); i++) {
+            try {
+                if (truePartnerHand.get(i).color == color) {
+                    this.hand.remove(i);
+                    this.hand.add(i, truePartnerHand.get(i));
+                }
+            } catch (Exception e) {
+                System.out.println("Error in updateHandColorKnowledge");
+            }
+        }
+    }
+
+    public void updateHandValueKnowledge(int value, Hand truePartnerHand) {
+        for (int i = 0; i < truePartnerHand.size(); i++) {
+            try {
+                if (truePartnerHand.get(i).value == value) {
+                    this.hand.remove(i);
+                    this.hand.add(i, truePartnerHand.get(i));
+                }
+            } catch (Exception e) {
+                System.out.println("Error in updateHandNumberKnowledge");
+            }
+        }
+    }
 }
