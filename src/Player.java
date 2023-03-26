@@ -346,7 +346,7 @@ public class Player {
 		for (int i = 0; i < this.truePartnerHand.size(); i++) {
 			Card c = this.truePartnerHand.get(i);
 			values.set(c.value-1, values.get(c.value-1) + 1);
-			colors.set(c.color, values.get(c.color) + 1);
+			colors.set(c.color, colors.get(c.color) + 1);
 		}
 		System.out.println(colors);
 		System.out.println(values);
@@ -359,22 +359,37 @@ public class Player {
 	}
 
 	private int getMostHelpfulColor() throws Exception {
+		// for (int i = 0; i < this.truePartnerHand.size(); i++) {
+		// 	Card c = this.truePartnerHand.get(i);
+		// 	if (c.color != -1) {
+		// 		return c.color;
+		// 	}
+		// }
+		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
 		for (int i = 0; i < this.truePartnerHand.size(); i++) {
 			Card c = this.truePartnerHand.get(i);
-			if (c.color != -1) {
-				return c.color;
-			}
+			colors.set(c.color, colors.get(c.color) + 1);
 		}
-		return 0;
+
+		System.out.println(colors.indexOf(Collections.max(colors)));
+		return colors.indexOf(Collections.max(colors));
 	}
 
 	private int getMostHelpfulNumber() throws Exception {
+		// for (int i = 0; i < this.truePartnerHand.size(); i++) {
+		// 	Card c = this.truePartnerHand.get(i);
+		// 	if (c.value != -1) {
+		// 		return c.value;
+		// 	}
+		// }
+		// return 0;
+		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
 		for (int i = 0; i < this.truePartnerHand.size(); i++) {
 			Card c = this.truePartnerHand.get(i);
-			if (c.value != -1) {
-				return c.value;
-			}
+			values.set(c.value -1, values.get(c.value-1) + 1);
 		}
-		return 0;
+
+		System.out.println(values.indexOf(Collections.max(values)) + 1);
+		return values.indexOf(Collections.max(values)) + 1;
 	}
 }
