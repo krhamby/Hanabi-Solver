@@ -230,6 +230,8 @@ public class Player {
 			return "DISCARD " + idx + " " + idx;
 		} else if (canPlay()) {
 			int idx = this.getPlayIndex();
+			System.out.println("played");
+
 			return "PLAY " + idx + " " + idx;
 		} else {
 			if (this.colorIsMoreHelpful()) {
@@ -348,9 +350,9 @@ public class Player {
 			values.set(c.value-1, values.get(c.value-1) + 1);
 			colors.set(c.color, colors.get(c.color) + 1);
 		}
-		System.out.println(colors);
-		System.out.println(values);
-		System.out.println(Collections.max(colors) > Collections.max(values));
+		// System.out.println(colors);
+		// System.out.println(values);
+		// System.out.println(Collections.max(colors) > Collections.max(values));
 		if(Collections.max(colors) > Collections.max(values)) {
 			return true;
 		} else {
@@ -366,12 +368,15 @@ public class Player {
 		// 	}
 		// }
 		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
-		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+		for (int i = 0; i < this.partner.hand.size(); i++) {
+			Card knownC = this.partner.hand.get(i);
 			Card c = this.truePartnerHand.get(i);
-			colors.set(c.color, colors.get(c.color) + 1);
+			if(knownC.color == -1) {
+				colors.set(c.color, colors.get(c.color) + 1);
+			}
 		}
 
-		System.out.println(colors.indexOf(Collections.max(colors)));
+		// System.out.println(colors.indexOf(Collections.max(colors)));
 		return colors.indexOf(Collections.max(colors));
 	}
 
@@ -384,12 +389,15 @@ public class Player {
 		// }
 		// return 0;
 		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
-		for (int i = 0; i < this.truePartnerHand.size(); i++) {
-			Card c = this.truePartnerHand.get(i);
+		for (int i = 0; i < this.partner.hand.size(); i++) {
+			Card knownC = this.partner.hand.get(i);
+			Card c = this.partner.hand.get(i);
+			if(knownC.value == -1) {
 			values.set(c.value -1, values.get(c.value-1) + 1);
+			}
 		}
 
-		System.out.println(values.indexOf(Collections.max(values)) + 1);
+		// System.out.println(values.indexOf(Collections.max(values)) + 1);
 		return values.indexOf(Collections.max(values)) + 1;
 	}
 }
