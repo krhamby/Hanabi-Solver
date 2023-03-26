@@ -19,6 +19,7 @@ public class Player {
 	private int numHints;
 	private int numFuses;
 	private ArrayList<Card> possibleRemainingCards;
+	private ArrayList<Card> partnerPossibleRemainingCards;
 	private ArrayList<Integer> tableau;
 	private ArrayList<Card> discardPile;
 	
@@ -49,6 +50,7 @@ public class Player {
 				}
 			}
 		}
+		this.partnerPossibleRemainingCards = new ArrayList<Card>(this.possibleRemainingCards);
 		this.tableau = new ArrayList<Integer>();
 		for (int i = 0; i < 5; i++) {
 			this.tableau.add(0);
@@ -98,11 +100,22 @@ public class Player {
 	 * @param wasLegalPLay Whether the play was legal or not.
 	 * @param boardState The state of the board after play.
 	 */
-	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex,
-			Hand finalHand, boolean wasLegalPlay, Board boardState) throws Exception {
+	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex, Hand finalHand,
+			boolean wasLegalPlay, Board boardState) throws Exception {
 		// update what we think our partner knows about their own hand
 		this.imperfectPartnerHand.remove(playIndex);
-		
+		this.imperfectPartnerHand.add(drawIndex, new Card(-1, -1));
+
+		// update what we think our partner knows about the board
+		this.partnerPossibleRemainingCards.remove(play);
+
+		// update what we know about our partner's hand
+		this.truePartnerHand = finalHand;
+
+		// update what we know about the board
+		this.possibleRemainingCards.remove(draw);
+		this.numHints = boardState.numHints;
+		this.numFuses = boardState.numFuses;
 	}
 	
 	/**
@@ -112,7 +125,10 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourPlay(Card play, boolean wasLegalPlay, Board boardState) {
-
+		// update what we know about the board
+		this.possibleRemainingCards.remove(play);
+		this.numHints = boardState.numHints;
+		this.numFuses = boardState.numFuses;
 	}
 	
 	/**
