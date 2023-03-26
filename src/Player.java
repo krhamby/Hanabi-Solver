@@ -74,6 +74,7 @@ public class Player {
 		startHand.remove(disIndex);
 		startHand.add(drawIndex, draw);
 		possibleRemainingCards.remove(draw);
+		numHints = boardState.numHints;
 		finalHand = new Hand(startHand);
 		this.discardPile.add(discard);
 		this.truePartnerHand = finalHand;
@@ -85,7 +86,8 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourDiscard(Card discard, Board boardState) {
-		// TODO: maybe update myHand? -- we may do this in ask()
+		numHints = boardState.numHints;
+		possibleRemainingCards.remove(discard);
 		this.discardPile.add(discard);
 	}
 	
