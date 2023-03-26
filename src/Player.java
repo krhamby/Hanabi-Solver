@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.Random;
 
 /**
  * This is the only class you should edit.
@@ -26,15 +26,19 @@ public class Player {
 
 	private boolean sawPartnerHand;
 
-	// Delete this once you actually write your own version of the class.
-	private static Scanner scn = new Scanner(System.in);
-	
 	/**
 	 * This default constructor should be the only constructor you supply.
 	 */
 	public Player() {
 		// initialize our hand knowledge
 		this.myHand = new Hand();
+		try {
+			for (int i = 0; i < 5; i++) {
+				this.myHand.add(i, new Card(-1, -1));
+			}
+		} catch (Exception e) {
+			System.out.println("Error in Player constructor");
+		}
 		this.truePartnerHand = new Hand();
 		this.sawPartnerHand = false;
 
@@ -110,8 +114,9 @@ public class Player {
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex, Hand finalHand,
 			boolean wasLegalPlay, Board boardState) throws Exception {
 		// update what we think our partner knows about their own hand
-		this.partner.hand.remove(playIndex);
-		this.partner.hand.add(drawIndex, new Card(-1, -1));
+		// TODO: this causes an error because we do not update the partner's knowledge base somewhere
+		// this.partner.hand.remove(playIndex);
+		// this.partner.hand.add(drawIndex, new Card(-1, -1));
 
 		// update what we think our partner knows about the board
 		this.partner.possibleRemainingCards.remove(play);
@@ -123,6 +128,8 @@ public class Player {
 		this.possibleRemainingCards.remove(draw);
 		this.numHints = boardState.numHints;
 		this.numFuses = boardState.numFuses;
+		this.tableau = boardState.tableau;
+		this.discardPile = boardState.discards;
 	}
 	
 	/**
@@ -136,6 +143,8 @@ public class Player {
 		this.possibleRemainingCards.remove(play);
 		this.numHints = boardState.numHints;
 		this.numFuses = boardState.numFuses;
+		this.tableau = boardState.tableau;
+		this.discardPile = boardState.discards;
 	}
 	
 	/**
@@ -207,16 +216,152 @@ public class Player {
 			for (int i = 0; i < partnerHand.size(); i++) {
 				this.possibleRemainingCards.remove(partnerHand.get(i));
 			}
+			this.sawPartnerHand = true;
 		}
 
+		// before we make any decisions, make sure we have the most up-to-date information
+		this.truePartnerHand = partnerHand;
 
-
-
-
-
-		// Provided for testing purposes only; delete.
-		// Your method should construct and return a String without user input.
-		return scn.nextLine();
+		if (this.numHints == 1) {
+			int idx = this.getDiscardIndex();
+			return "DISCARD " + idx + " " + idx;
+		} else if (canPlay()) {
+			int idx = this.getPlayIndex();
+			return "PLAY " + idx + " " + idx;
+		} else {
+			if (this.colorIsMoreHelpful()) {
+				int color = this.getMostHelpfulColor();
+				return "COLORHINT " + color;
+			} else {
+				int number = this.getMostHelpfulNumber();
+				return "NUMBERHINT " + number;
+			}
+		}
 	}
 
+	// MARK: - Helper methods for ask()
+
+	// basic method to get the game running
+	private boolean canPlay() throws Exception {
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			switch (c.color) {
+				case 0:
+					if (this.tableau.get(0) == c.value - 1) {
+						return true;
+					}
+					break;
+				case 1:
+					if (this.tableau.get(1) == c.value - 1) {
+						return true;
+					}
+					break;
+				case 2:
+					if (this.tableau.get(2) == c.value - 1) {
+						return true;
+					}
+					break;
+				case 3:
+					if (this.tableau.get(3) == c.value - 1) {
+						return true;
+					}
+					break;
+				case 4:
+					if (this.tableau.get(4) == c.value - 1) {
+						return true;
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		return false;
+	}
+
+	private int getPlayIndex() throws Exception {
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			switch (c.color) {
+				case 0:
+					if (this.tableau.get(0) == c.value - 1) {
+						return i;
+					}
+					break;
+				case 1:
+					if (this.tableau.get(1) == c.value - 1) {
+						return i;
+					}
+					break;
+				case 2:
+					if (this.tableau.get(2) == c.value - 1) {
+						return i;
+					}
+					break;
+				case 3:
+					if (this.tableau.get(3) == c.value - 1) {
+						return i;
+					}
+					break;
+				case 4:
+					if (this.tableau.get(4) == c.value - 1) {
+						return i;
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		return 0;
+	}
+
+	// basic method to get the game running
+	private int getDiscardIndex() throws Exception {
+		// TODO: add logic for a card that we know is not playable since it makes the most sense to discard it before anything else
+
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.color == -1 && c.value == -1) {
+				return i;
+			}
+		}
+
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.color == -1 || c.value == -1) {
+				return i;
+			}
+		}
+
+		return 0;
+	}
+
+	private boolean colorIsMoreHelpful() throws Exception {
+		Random rand = new Random();
+		int i = rand.nextInt(2);
+		if (i == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private int getMostHelpfulColor() throws Exception {
+		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+			Card c = this.truePartnerHand.get(i);
+			if (c.color != -1) {
+				return c.color;
+			}
+		}
+		return 0;
+	}
+
+	private int getMostHelpfulNumber() throws Exception {
+		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+			Card c = this.truePartnerHand.get(i);
+			if (c.value != -1) {
+				return c.value;
+			}
+		}
+		return 0;
+	}
 }
