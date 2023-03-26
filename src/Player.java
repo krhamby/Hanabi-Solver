@@ -41,6 +41,12 @@ public class Player {
 		for (int i = 0; i < 5; i++) {
 			for (int j = 1; j < 6; j++) {
 				this.possibleRemainingCards.add(new Card(i, j));
+				if (i == 1) {
+				this.possibleRemainingCards.add(new Card(i, j));
+				}
+				if (i < 5) {
+				this.possibleRemainingCards.add(new Card(i, j));
+				}
 			}
 		}
 		this.tableau = new ArrayList<Integer>();
@@ -65,7 +71,7 @@ public class Player {
 			Hand finalHand, Board boardState) throws Exception {
 		startHand.remove(disIndex);
 		startHand.add(drawIndex, draw);
-		remainingCards.remove(draw);
+		possibleRemainingCards.remove(draw);
 		finalHand = new Hand(startHand);
 		this.discardPile.add(discard);
 		this.truePartnerHand = finalHand;
