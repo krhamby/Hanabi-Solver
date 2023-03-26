@@ -24,6 +24,8 @@ public class Player {
 	// partner's imperfect knowledge
 	private PartnerKnowledge partner;
 
+	private boolean sawPartnerHand;
+
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
 	
@@ -34,6 +36,7 @@ public class Player {
 		// initialize our hand knowledge
 		this.myHand = new Hand();
 		this.truePartnerHand = new Hand();
+		this.sawPartnerHand = false;
 
 		// initialize our board knowledge
 		this.numHints = 8;
@@ -142,10 +145,19 @@ public class Player {
 	 * @param partnerHand Your partner's current hand.
 	 * @param boardState The state of the board after the hint.
 	 */
-	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
+	public void tellColorHint(int color, ArrayList<Integer> indices, Hand partnerHand, Board boardState) throws Exception {
 		// update what we know about our partner's hand
 		this.truePartnerHand = partnerHand;
 
+		// update what we know about our own hand
+		for (int i : indices) {
+			Card c = this.myHand.remove(i);
+			Card newCard = new Card(color, c.value);
+			this.myHand.add(i, newCard);
+		}
+
+		// update what we know about the board
+		this.numHints = boardState.numHints;
 	}
 	
 	/**
@@ -155,8 +167,19 @@ public class Player {
 	 * @param partnerHand Your partner's current hand.
 	 * @param boardState The state of the board after the hint.
 	 */
-	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) {
-		
+	public void tellNumberHint(int number, ArrayList<Integer> indices, Hand partnerHand, Board boardState) throws Exception {
+		// update what we know about our partner's hand
+		this.truePartnerHand = partnerHand;
+
+		// update what we know about our own hand
+		for (int i : indices) {
+			Card c = this.myHand.remove(i);
+			Card newCard = new Card(c.color, number);
+			this.myHand.add(i, newCard);
+		}
+
+		// update what we know about the board
+		this.numHints = boardState.numHints;
 	}
 	
 	/**
@@ -179,7 +202,18 @@ public class Player {
 	 *     This command informs your partner which of his cards have the chosen color. An error will result if none of
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
-	public String ask(int yourHandSize, Hand partnerHand, Board boardState) {
+	public String ask(int yourHandSize, Hand partnerHand, Board boardState) throws Exception {
+		if (!sawPartnerHand) {
+			for (int i = 0; i < partnerHand.size(); i++) {
+				this.possibleRemainingCards.remove(partnerHand.get(i));
+			}
+		}
+
+
+
+
+
+
 		// Provided for testing purposes only; delete.
 		// Your method should construct and return a String without user input.
 		return scn.nextLine();
