@@ -10,7 +10,8 @@ public class Player {
 	// Add whatever variables you want. You MAY NOT use static variables, or otherwise allow direct communication between
 	// different instances of this class by any means; doing so will result in a score of 0.
 	private Hand myHand;
-	private Hand partnerHand;
+	private Hand truePartnerHand;
+	private Hand imperfectPartnerHand;
 	private ArrayList<Card> discardPile;
 	
 	// Delete this once you actually write your own version of the class.
@@ -23,7 +24,7 @@ public class Player {
 		// since we do not know anything about the state of the game until ask() is called,
 		// we will initialize empty states for our hands and discard pile
 		this.myHand = new Hand();
-		this.partnerHand = new Hand();
+		this.truePartnerHand = new Hand();
 		this.discardPile = new ArrayList<Card>();
 	}
 	
@@ -40,7 +41,7 @@ public class Player {
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
 			Hand finalHand, Board boardState) {
 		this.discardPile.add(discard);
-		this.partnerHand = finalHand;
+		this.truePartnerHand = finalHand;
 	}
 	
 	/**
@@ -66,7 +67,7 @@ public class Player {
 	 */
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex,
 			Hand finalHand, boolean wasLegalPlay, Board boardState) {
-		
+		this.truePartnerHand = finalHand;
 	}
 	
 	/**
@@ -76,7 +77,7 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourPlay(Card play, boolean wasLegalPlay, Board boardState) {
-		
+		// TODO: I don't know that we will update any information in our knowledge base here; it could depend on wasLegalPlay
 	}
 	
 	/**
