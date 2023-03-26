@@ -59,9 +59,14 @@ public class Player {
 	 * @param drawIndex The index to which he drew it.
 	 * @param finalHand The hand your partner ended with after redrawing.
 	 * @param boardState The state of the board after play.
+	 * @throws Exception
 	 */
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
-			Hand finalHand, Board boardState) {
+			Hand finalHand, Board boardState) throws Exception {
+		startHand.remove(disIndex);
+		startHand.add(drawIndex, draw);
+		remainingCards.remove(draw);
+		finalHand = new Hand(startHand);
 		this.discardPile.add(discard);
 		this.truePartnerHand = finalHand;
 	}
