@@ -18,7 +18,7 @@ public class Player {
 	// knowledge about the board
 	private int numHints;
 	private int numFuses;
-	private ArrayList<Card> remainingCards;
+	private ArrayList<Card> possibleRemainingCards;
 	private ArrayList<Integer> tableau;
 	private ArrayList<Card> discardPile;
 	
@@ -37,7 +37,12 @@ public class Player {
 		// initialize our board knowledge
 		this.numHints = 8;
 		this.numFuses = 3;
-		this.remainingCards = new ArrayList<Card>();
+		this.possibleRemainingCards = new ArrayList<Card>();
+		for (int i = 0; i < 5; i++) {
+			for (int j = 1; j < 6; j++) {
+				this.possibleRemainingCards.add(new Card(i, j));
+			}
+		}
 		this.tableau = new ArrayList<Integer>();
 		for (int i = 0; i < 5; i++) {
 			this.tableau.add(0);
@@ -83,8 +88,10 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellPartnerPlay(Hand startHand, Card play, int playIndex, Card draw, int drawIndex,
-			Hand finalHand, boolean wasLegalPlay, Board boardState) {
-		this.truePartnerHand = finalHand;
+			Hand finalHand, boolean wasLegalPlay, Board boardState) throws Exception {
+		// update what we think our partner knows about their own hand
+		this.imperfectPartnerHand.remove(playIndex);
+		
 	}
 	
 	/**
@@ -94,7 +101,7 @@ public class Player {
 	 * @param boardState The state of the board after play.
 	 */
 	public void tellYourPlay(Card play, boolean wasLegalPlay, Board boardState) {
-		// TODO: I don't know that we will update any information in our knowledge base here; it could depend on wasLegalPlay
+
 	}
 	
 	/**
