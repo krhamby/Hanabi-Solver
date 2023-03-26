@@ -9,10 +9,18 @@ import java.util.Scanner;
 public class Player {
 	// Add whatever variables you want. You MAY NOT use static variables, or otherwise allow direct communication between
 	// different instances of this class by any means; doing so will result in a score of 0.
+
+	// knowledge about hands
 	private Hand myHand;
 	private Hand truePartnerHand;
 	private Hand imperfectPartnerHand;
-	private ArrayList<Card> discardPile;
+
+	// knowledge about the board
+	private int numHints;
+	private int numFuses;
+	private ArrayList<Card> remainingCards;
+	private ArrayList<Integer> tableau;
+	private ArrayList<Card> discards;
 	
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
@@ -25,7 +33,7 @@ public class Player {
 		// we will initialize empty states for our hands and discard pile
 		this.myHand = new Hand();
 		this.truePartnerHand = new Hand();
-		this.discardPile = new ArrayList<Card>();
+		this.discards = new ArrayList<Card>();
 	}
 	
 	/**
@@ -40,7 +48,7 @@ public class Player {
 	 */
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
 			Hand finalHand, Board boardState) {
-		this.discardPile.add(discard);
+		this.discards.add(discard);
 		this.truePartnerHand = finalHand;
 	}
 	
@@ -51,7 +59,7 @@ public class Player {
 	 */
 	public void tellYourDiscard(Card discard, Board boardState) {
 		// TODO: maybe update myHand? -- we may do this in ask()
-		this.discardPile.add(discard);
+		this.discards.add(discard);
 	}
 	
 	/**
