@@ -24,7 +24,7 @@ public class Player {
 	private ArrayList<Integer> tableau;
 	private ArrayList<Card> discardPile;
 
-	// partner's imperfect knowledge
+	// partner's imperfect knowledge based on our hints
 	private PartnerKnowledge partner;
 
 	private boolean sawPartnerHand;
@@ -90,6 +90,10 @@ public class Player {
 		finalHand = new Hand(startHand);
 		this.discardPile.add(discard);
 		this.truePartnerHand = finalHand;
+
+		// update what we think our partner knows about their own hand
+		this.partner.hand.remove(disIndex);
+		this.partner.hand.add(drawIndex, new Card(-1, -1));
 	}
 	
 	/**
@@ -118,8 +122,8 @@ public class Player {
 			boolean wasLegalPlay, Board boardState) throws Exception {
 		// update what we think our partner knows about their own hand
 		// TODO: this causes an error because we do not update the partner's knowledge base somewhere
-		// this.partner.hand.remove(playIndex);
-		// this.partner.hand.add(drawIndex, new Card(-1, -1));
+		this.partner.hand.remove(playIndex);
+		this.partner.hand.add(drawIndex, new Card(-1, -1));
 
 		// update what we think our partner knows about the board
 		this.partner.possibleRemainingCards.remove(play);
@@ -224,21 +228,26 @@ public class Player {
 
 		// before we make any decisions, make sure we have the most up-to-date information
 		this.truePartnerHand = partnerHand;
+		this.numHints = boardState.numHints;
+		this.numFuses = boardState.numFuses;
 
-		if (this.numHints == 1) {
+		if (this.numHints == 1 && !this.canConfidentlyPlay()) {
 			int idx = this.getDiscardIndex();
 			return "DISCARD " + idx + " " + idx;
-		} else if (canPlay()) {
-			int idx = this.getPlayIndex();
-			System.out.println("played");
-
+		} else if (canConfidentlyPlay()) {
+			int idx = this.getConfidentPlayIndex();
+			return "PLAY " + idx + " " + idx;
+		} else if (canPlayOne() && this.numFuses > 1) {
+			int idx = this.getPlayOneIndex();
 			return "PLAY " + idx + " " + idx;
 		} else {
 			if (this.colorIsMoreHelpful()) {
 				int color = this.getMostHelpfulColor();
+				this.partner.updateHandColorKnowledge(color, partnerHand);
 				return "COLORHINT " + color;
 			} else {
 				int number = this.getMostHelpfulNumber();
+				this.partner.updateHandValueKnowledge(number - 1, partnerHand);
 				return "NUMBERHINT " + number;
 			}
 		}
@@ -247,7 +256,7 @@ public class Player {
 	// MARK: - Helper methods for ask()
 
 	// basic method to get the game running
-	private boolean canPlay() throws Exception {
+	private boolean canConfidentlyPlay() throws Exception {
 		for (int i = 0; i < this.myHand.size(); i++) {
 			Card c = this.myHand.get(i);
 			switch (c.color) {
@@ -283,7 +292,7 @@ public class Player {
 		return false;
 	}
 
-	private int getPlayIndex() throws Exception {
+	private int getConfidentPlayIndex() throws Exception {
 		for (int i = 0; i < this.myHand.size(); i++) {
 			Card c = this.myHand.get(i);
 			switch (c.color) {
@@ -316,7 +325,27 @@ public class Player {
 					break;
 			}
 		}
-		return 0;
+		return 0; // should never get here since we check if we can confidently play before calling this method
+	}
+
+	private boolean canPlayOne() throws Exception {
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.value == 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private int getPlayOneIndex() throws Exception {
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.value == 1) {
+				return i;
+			}
+		}
+		return 0; // should never get here since we check if we can confidently play before calling this method
 	}
 
 	// basic method to get the game running
@@ -341,8 +370,6 @@ public class Player {
 	}
 
 	private boolean colorIsMoreHelpful() throws Exception {
-		// Random rand = new Random();
-		// int i = rand.nextInt(2);
 		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
 		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
 		for (int i = 0; i < this.partner.hand.size(); i++) {
@@ -355,9 +382,6 @@ public class Player {
 				values.set(c.value-1, values.get(c.value-1) + 1);
 			}
 		}
-		// System.out.println(colors);
-		// System.out.println(values);
-		// System.out.println(Collections.max(colors) > Collections.max(values));
 		if(Collections.max(colors) > Collections.max(values)) {
 			return true;
 		} else {
@@ -366,12 +390,6 @@ public class Player {
 	}
 
 	private int getMostHelpfulColor() throws Exception {
-		// for (int i = 0; i < this.truePartnerHand.size(); i++) {
-		// 	Card c = this.truePartnerHand.get(i);
-		// 	if (c.color != -1) {
-		// 		return c.color;
-		// 	}
-		// }
 		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
 		for (int i = 0; i < this.partner.hand.size(); i++) {
 			Card knownC = this.partner.hand.get(i);
@@ -381,28 +399,19 @@ public class Player {
 			}
 		}
 
-		// System.out.println(colors.indexOf(Collections.max(colors)));
 		return colors.indexOf(Collections.max(colors));
 	}
 
 	private int getMostHelpfulNumber() throws Exception {
-		// for (int i = 0; i < this.truePartnerHand.size(); i++) {
-		// 	Card c = this.truePartnerHand.get(i);
-		// 	if (c.value != -1) {
-		// 		return c.value;
-		// 	}
-		// }
-		// return 0;
 		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
 		for (int i = 0; i < this.partner.hand.size(); i++) {
 			Card knownC = this.partner.hand.get(i);
-			Card c = this.partner.hand.get(i);
+			Card c = this.truePartnerHand.get(i);
 			if(knownC.value == -1) {
-			values.set(c.value -1, values.get(c.value-1) + 1);
+				values.set(c.value - 1, values.get(c.value - 1) + 1);
 			}
 		}
 
-		// System.out.println(values.indexOf(Collections.max(values)) + 1);
 		return values.indexOf(Collections.max(values)) + 1;
 	}
 }
