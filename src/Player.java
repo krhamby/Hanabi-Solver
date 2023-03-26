@@ -20,7 +20,7 @@ public class Player {
 	private int numFuses;
 	private ArrayList<Card> remainingCards;
 	private ArrayList<Integer> tableau;
-	private ArrayList<Card> discards;
+	private ArrayList<Card> discardPile;
 	
 	// Delete this once you actually write your own version of the class.
 	private static Scanner scn = new Scanner(System.in);
@@ -29,11 +29,20 @@ public class Player {
 	 * This default constructor should be the only constructor you supply.
 	 */
 	public Player() {
-		// since we do not know anything about the state of the game until ask() is called,
-		// we will initialize empty states for our hands and discard pile
+		// initialize our hand knowledge
 		this.myHand = new Hand();
 		this.truePartnerHand = new Hand();
-		this.discards = new ArrayList<Card>();
+		this.imperfectPartnerHand = new Hand();
+
+		// initialize our board knowledge
+		this.numHints = 8;
+		this.numFuses = 3;
+		this.remainingCards = new ArrayList<Card>();
+		this.tableau = new ArrayList<Integer>();
+		for (int i = 0; i < 5; i++) {
+			this.tableau.add(0);
+		}
+		this.discardPile = new ArrayList<Card>();
 	}
 	
 	/**
@@ -48,7 +57,7 @@ public class Player {
 	 */
 	public void tellPartnerDiscard(Hand startHand, Card discard, int disIndex, Card draw, int drawIndex, 
 			Hand finalHand, Board boardState) {
-		this.discards.add(discard);
+		this.discardPile.add(discard);
 		this.truePartnerHand = finalHand;
 	}
 	
@@ -59,7 +68,7 @@ public class Player {
 	 */
 	public void tellYourDiscard(Card discard, Board boardState) {
 		// TODO: maybe update myHand? -- we may do this in ask()
-		this.discards.add(discard);
+		this.discardPile.add(discard);
 	}
 	
 	/**
