@@ -1,7 +1,7 @@
 
 public class Driver {
 	public static void main(String[] args) {
-		boolean test = false;
+		int max = 0;
 		// Hanabi game = new Hanabi(true);
 		// game.play();
 		
@@ -12,17 +12,13 @@ public class Driver {
 			int score = next.play();
 			System.out.println("Game " + i + " score: " + score);
 			total += score;
-			if (score > 0) {
-				test = true;
+
+			if (score > max) {
+				max = score;
 			}
 		}
 		System.out.println("Final average: " + (total/1000.0));
-		if (test) {
-			System.out.println("You passed the test!");
-		}
-		else {
-			System.out.println("You failed the test.");
-		}
+		System.out.println("Max score: " + max);
 	}
 
 }
