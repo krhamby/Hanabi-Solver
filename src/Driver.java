@@ -3,8 +3,8 @@ public class Driver {
 	public static void main(String[] args) {
 		int max = 0;
 		int totalZeros = 0;
-		// Hanabi game = new Hanabi(true);
-		// game.play();
+		Hanabi game = new Hanabi(true);
+		game.play();
 		
 		// This is the code I will actually use to test your code's behavior.
 		int total = 0;

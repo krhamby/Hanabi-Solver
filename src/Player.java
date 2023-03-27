@@ -1,8 +1,5 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Random;
 
 /**
  * This is the only class you should edit.
@@ -356,11 +353,20 @@ public class Player {
 	private int getDiscardableCardIndex() throws Exception {
 		for (int i = 0; i < this.myHand.size(); i++) {
 			Card c = this.myHand.get(i);
-			if (c.color == -1 && c.value == -1) {
+			if (cardInTableau(c)) {
+				return i;
+			} else if (c.color == -1 && c.value == -1) {
 				return i;
 			}
 		}
 		return -1;
+	}
+
+	private boolean cardInTableau(Card c) {
+		if (c.color == -1 || c.value == -1) {
+			return false;
+		}
+		return this.tableau.get(c.color) >= c.value - 1;
 	}
 	
 	private Hint getBestOverallHint() throws Exception {
