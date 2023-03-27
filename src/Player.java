@@ -253,6 +253,7 @@ public class Player {
 		} else if (canPlayOne() && this.numFuses > 1) {//TODO: maybe swap this with the hinting
 			int idx = this.getPlayOneIndex();
 			return "PLAY " + idx + " " + idx;
+		
 		} else {
 			if (this.colorIsMoreHelpful()) {
 				int color = this.getMostHelpfulColor();
@@ -365,6 +366,9 @@ public class Player {
 	private int getDiscardIndex() throws Exception {
 		for (int i = 0; i < this.myHand.size(); i++) {
 			Card c = this.myHand.get(i);
+			if(tableau.get(c.color) >= c.value && c.value != -1) {
+				return i;
+			}
 			if (!this.cardIsPlayable(c)) { // TODO: idk that this does anything
 				return i;
 			} else if (c.color == -1 && c.value == -1) {
@@ -459,7 +463,7 @@ public class Player {
 	private boolean partnerCanConfidentlyPlay() throws Exception {
 		for (int i = 0; i < this.truePartnerHand.size(); i++) {
 			Card c = this.truePartnerHand.get(i);
-			if (this.cardIsPlayable(c) && (this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1)) {
+			if (this.cardIsPlayable(c) && this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1) {
 				return true;
 			}
 		}
@@ -469,7 +473,7 @@ public class Player {
 	private int getPartnerConfidentPlayIndex() throws Exception {
 		for (int i = 0; i < this.truePartnerHand.size(); i++) {
 			Card c = this.truePartnerHand.get(i);
-			if (this.cardIsPlayable(c) && (this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1)) {
+			if (this.cardIsPlayable(c) && this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1) {
 				return i;
 			}
 		}
