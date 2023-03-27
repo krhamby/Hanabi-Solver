@@ -249,7 +249,8 @@ public class Player {
 				this.partner.updateHandValueKnowledge(number - 1, partnerHand);
 				return "NUMBERHINT " + number;
 			}
-		} else if (canPlayOne() && this.numFuses > 1) {
+
+		} else if (canPlayOne() && this.numFuses > 1) {//TODO: maybe swap this with the hinting
 			int idx = this.getPlayOneIndex();
 			return "PLAY " + idx + " " + idx;
 		} else {
