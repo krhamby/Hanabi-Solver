@@ -273,14 +273,26 @@ public class Player {
 		}
 
 		// if we know we have a one with a color we don't have on the board, play it
-		int oneCardIndex = getOneCardIndex();
-		if (oneCardIndex != -1) {
-			this.myHand.remove(oneCardIndex);
-			this.myHand.add(oneCardIndex, new Card(-1, -1));
-			return "PLAY " + oneCardIndex + " " + oneCardIndex;
+		if (numFuses > 1) {
+			int oneCardIndex = getOneCardIndex();
+			if (oneCardIndex != -1) {
+				this.myHand.remove(oneCardIndex);
+				this.myHand.add(oneCardIndex, new Card(-1, -1));
+				return "PLAY " + oneCardIndex + " " + oneCardIndex;
+			}
 		}
 
-		// if all else fails, discard the first card in our hand
+		// if all else fails, discard the first card -1, -1 card in our hand
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.value == -1 || c.color == -1) {
+				this.myHand.remove(i);
+				this.myHand.add(i, new Card(-1, -1));
+				return "DISCARD " + i + " " + i;
+			}
+		}
+
+		// if we get here, we have no idea what to do, so just discard the first card in our hand
 		this.myHand.remove(0);
 		this.myHand.add(0, new Card(-1, -1));
 		return "DISCARD 0 0";
@@ -384,6 +396,8 @@ public class Player {
 			Card c = this.myHand.get(i);
 			if (cardInTableau(c)) {
 				return i;
+			} else if (c.value == 5) {
+				return i;
 			} else if (c.color == -1 && c.value == -1) {
 				return i;
 			}
@@ -402,7 +416,7 @@ public class Player {
 		int maxNumColorHints = getMaxNumColorHints();
 		int maxNumValueHints = getMaxNumValueHints();
 
-		if (maxNumColorHints <= 1 && maxNumValueHints <= 1) {
+		if (maxNumColorHints <= 2 || maxNumValueHints <= 2) {
 			return null;
 		} else if (maxNumColorHints > maxNumValueHints) {
 			return new Hint(true, getBestColorHint());

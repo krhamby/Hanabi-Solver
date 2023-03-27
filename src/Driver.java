@@ -24,7 +24,7 @@ public class Driver {
 		}
 		System.out.println("Final average: " + (total/1000.0));
 		System.out.println("Max score: " + max);
-		System.out.println("Total games with 0 score: " + totalZeros);
+		System.out.println("Total games with a 0 score: " + totalZeros);
 	}
 
 }
