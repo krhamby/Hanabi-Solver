@@ -218,6 +218,7 @@ public class Player {
 	 *     his cards have that color, or if no hints remain. This command consumes a hint.
 	 */
 	public String ask(int yourHandSize, Hand partnerHand, Board boardState) throws Exception {
+		// use our partner's hand to update what we know about the board
 		if (!sawPartnerHand) {
 			for (int i = 0; i < partnerHand.size(); i++) {
 				this.possibleRemainingCards.remove(partnerHand.get(i));
@@ -230,211 +231,157 @@ public class Player {
 		this.numHints = boardState.numHints;
 		this.numFuses = boardState.numFuses;
 
-		if (this.numHints == 0 && !this.canConfidentlyPlay()) {
-			int idx = this.getDiscardIndex();
-			return "DISCARD " + idx + " " + idx;
-		} else if (canConfidentlyPlay()) {
-			int idx = this.getConfidentPlayIndex();
-			return "PLAY " + idx + " " + idx;
-		} else if (partnerCanConfidentlyPlay()) {
-			int idx = this.getPartnerConfidentPlayIndex();
-			Card c = this.partner.hand.get(idx);
-			Card knownCard = this.truePartnerHand.get(idx);
-			if (c.color == -1) {
-				int color = knownCard.color;
-				this.partner.updateHandColorKnowledge(color, partnerHand);
-				return "COLORHINT " + color;
-			} else {
-				int number = knownCard.value;
-				this.partner.updateHandValueKnowledge(number - 1, partnerHand);
-				return "NUMBERHINT " + number;
+		// if we have a playable card (i.e. a card we can play without risk), play it
+		int playableCardIndex = getPlayableCardIndex();
+		if (playableCardIndex != -1) {
+			return "PLAY " + playableCardIndex + " " + playableCardIndex;
+		} 
+
+		if (this.numHints > 0) {
+			// if our partner has a playable card but is unaware of it, give them a hint
+			int partnerPlayableCardIndex = getUnawarePartnerPlayableCardIndex();
+			if (partnerPlayableCardIndex != -1) {
+				Card knownCard = this.truePartnerHand.get(partnerPlayableCardIndex);
+				Card possibleCard = this.partner.hand.get(partnerPlayableCardIndex);
+				if (possibleCard.color == -1) {
+					this.partner.updateHandColorKnowledge(knownCard.color, partnerHand);
+					return "COLORHINT " + knownCard.color;
+				} else if (possibleCard.value == -1) {
+					this.partner.updateHandValueKnowledge(knownCard.value, partnerHand);
+					return "NUMBERHINT " + knownCard.value;
+				}
 			}
-		} else if (canPlayOne() && this.numFuses > 1) {
-			int idx = this.getPlayOneIndex();
-			return "PLAY " + idx + " " + idx;
+
+			// if that doesn't work, give our partner a generally useful hint
+			Hint bestHint = getBestOverallHint();
+			if (bestHint != null) {
+				if (bestHint.type) {
+					this.partner.updateHandColorKnowledge(bestHint.value, partnerHand);
+					return "COLORHINT " + bestHint.value;
+				} else if (!bestHint.type) {
+					this.partner.updateHandValueKnowledge(bestHint.value, partnerHand);
+					return "NUMBERHINT " + bestHint.value;
+				}
+			}
+		}
+
+		// if we have a card that we know is not immediately playable, discard it
+		int discardableCardIndex = getDiscardableCardIndex();
+		if (discardableCardIndex != -1) {
+			this.myHand.remove(discardableCardIndex);
+			this.myHand.add(discardableCardIndex, new Card(-1, -1));
+			return "DISCARD " + discardableCardIndex + " " + discardableCardIndex;
+		}
+
+		// if all else fails, discard the first card in our hand
+		this.myHand.remove(0);
+		this.myHand.add(0, new Card(-1, -1));
+		return "DISCARD 0 0";
+	}
+
+	private int getPlayableCardIndex() throws Exception {
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.value != -1 && c.color != -1) {
+				switch (c.color) {
+					case 0:
+						if (this.tableau.get(0) == c.value - 1) {
+							return i;
+						}
+						break;
+					case 1:
+						if (this.tableau.get(1) == c.value - 1) {
+							return i;
+						}
+						break;
+					case 2:
+						if (this.tableau.get(2) == c.value - 1) {
+							return i;
+						}
+						break;
+					case 3:
+						if (this.tableau.get(3) == c.value - 1) {
+							return i;
+						}
+						break;
+					case 4:
+						if (this.tableau.get(4) == c.value - 1) {
+							return i;
+						}
+						break;
+				}
+			}
+		}
+		return -1;
+	}
+
+	private int getUnawarePartnerPlayableCardIndex() throws Exception {
+		for (int i = 0; i < this.partner.hand.size(); i++) {
+			Card c = this.partner.hand.get(i);
+			Card knownCard = this.truePartnerHand.get(i);
+			if (c.value == -1 || c.color == -1) {
+				switch (knownCard.color) {
+					case 0:
+						if (this.tableau.get(0) == knownCard.value - 1) {
+							return i;
+						}
+						break;
+					case 1:
+						if (this.tableau.get(1) == knownCard.value - 1) {
+							return i;
+						}
+						break;
+					case 2:
+						if (this.tableau.get(2) == knownCard.value - 1) {
+							return i;
+						}
+						break;
+					case 3:
+						if (this.tableau.get(3) == knownCard.value - 1) {
+							return i;
+						}
+						break;
+					case 4:
+						if (this.tableau.get(4) == knownCard.value - 1) {
+							return i;
+						}
+						break;
+				}
+			}
+		}
+		return -1;
+	}
+
+	// can be greatly improved
+	private int getDiscardableCardIndex() throws Exception {
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.color == -1 && c.value == -1) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	private Hint getBestOverallHint() throws Exception {
+		int maxNumColorHints = getMaxNumColorHints();
+		int maxNumValueHints = getMaxNumValueHints();
+
+		if (maxNumColorHints <= 1 && maxNumValueHints <= 1) {
+			return null;
+		} else if (maxNumColorHints > maxNumValueHints) {
+			return new Hint(true, getBestColorHint());
 		} else {
-			if (this.colorIsMoreHelpful()) {
-				int color = this.getMostHelpfulColor();
-				this.partner.updateHandColorKnowledge(color, partnerHand);
-				return "COLORHINT " + color;
-			} else {
-				int number = this.getMostHelpfulNumber();
-				this.partner.updateHandValueKnowledge(number - 1, partnerHand);
-				return "NUMBERHINT " + number;
-			}
+			return new Hint(false, getBestValueHint());
 		}
 	}
 
-	// MARK: - Helper methods for ask()
-
-	// basic method to get the game running
-	private boolean canConfidentlyPlay() throws Exception {
-		for (int i = 0; i < this.myHand.size(); i++) {
-			Card c = this.myHand.get(i);
-			switch (c.color) {
-				case 0:
-					if (this.tableau.get(0) == c.value - 1) {
-						return true;
-					}
-					break;
-				case 1:
-					if (this.tableau.get(1) == c.value - 1) {
-						return true;
-					}
-					break;
-				case 2:
-					if (this.tableau.get(2) == c.value - 1) {
-						return true;
-					}
-					break;
-				case 3:
-					if (this.tableau.get(3) == c.value - 1) {
-						return true;
-					}
-					break;
-				case 4:
-					if (this.tableau.get(4) == c.value - 1) {
-						return true;
-					}
-					break;
-				default:
-					break;
-			}
-		}
-		return false;
-	}
-
-	private int getConfidentPlayIndex() throws Exception {
-		for (int i = 0; i < this.myHand.size(); i++) {
-			Card c = this.myHand.get(i);
-			switch (c.color) {
-				case 0:
-					if (this.tableau.get(0) == c.value - 1) {
-						return i;
-					}
-					break;
-				case 1:
-					if (this.tableau.get(1) == c.value - 1) {
-						return i;
-					}
-					break;
-				case 2:
-					if (this.tableau.get(2) == c.value - 1) {
-						return i;
-					}
-					break;
-				case 3:
-					if (this.tableau.get(3) == c.value - 1) {
-						return i;
-					}
-					break;
-				case 4:
-					if (this.tableau.get(4) == c.value - 1) {
-						return i;
-					}
-					break;
-				default:
-					break;
-			}
-		}
-		return 0; // should never get here since we check if we can confidently play before calling this method
-	}
-
-	private boolean canPlayOne() throws Exception {
-		for (int i = 0; i < this.myHand.size(); i++) {
-			Card c = this.myHand.get(i);
-			if (c.value == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private int getPlayOneIndex() throws Exception {
-		for (int i = 0; i < this.myHand.size(); i++) {
-			Card c = this.myHand.get(i);
-			if (c.value == 1) {
-				return i;
-			}
-		}
-		return 0; // should never get here since we check if we can confidently play before calling this method
-	}
-
-	// basic method to get the game running
-	private int getDiscardIndex() throws Exception {
-		for (int i = 0; i < this.myHand.size(); i++) {
-			Card c = this.myHand.get(i);
-			if (!this.cardIsPlayable(c)) { // TODO: idk that this does anything
-				return i;
-			} else if (c.color == -1 && c.value == -1) {
-				return i;
-			} else if (c.color == -1 || c.value == -1) {
-				return i;
-			} 
-		}
-
-		return 0;
-	}
-
-	private boolean cardIsPlayable(Card c) throws Exception {
-		switch (c.color) {
-			case 0:
-				if (this.tableau.get(0) == c.value - 1) {
-					return true;
-				}
-				break;
-			case 1:
-				if (this.tableau.get(1) == c.value - 1) {
-					return true;
-				}
-				break;
-			case 2:
-				if (this.tableau.get(2) == c.value - 1) {
-					return true;
-				}
-				break;
-			case 3:
-				if (this.tableau.get(3) == c.value - 1) {
-					return true;
-				}
-				break;
-			case 4:
-				if (this.tableau.get(4) == c.value - 1) {
-					return true;
-				}
-				break;
-			default:
-				break;
-		}
-		return false;
-	}
-
-	private boolean colorIsMoreHelpful() throws Exception {
+	private int getBestColorHint() throws Exception {
 		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
-		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
 		for (int i = 0; i < this.partner.hand.size(); i++) {
 			Card knownC = this.partner.hand.get(i);
 			Card c = this.truePartnerHand.get(i);
 			if (knownC.color == -1) {
-				colors.set(c.color, colors.get(c.color) + 1);
-			}
-			if (knownC.value == -1) {
-				values.set(c.value-1, values.get(c.value-1) + 1);
-			}
-		}
-		if(Collections.max(colors) > Collections.max(values)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private int getMostHelpfulColor() throws Exception {
-		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
-		for (int i = 0; i < this.partner.hand.size(); i++) {
-			Card knownC = this.partner.hand.get(i);
-			Card c = this.truePartnerHand.get(i);
-			if(knownC.color == -1) {
 				colors.set(c.color, colors.get(c.color) + 1);
 			}
 		}
@@ -442,12 +389,12 @@ public class Player {
 		return colors.indexOf(Collections.max(colors));
 	}
 
-	private int getMostHelpfulNumber() throws Exception {
+	private int getBestValueHint() throws Exception {
 		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
 		for (int i = 0; i < this.partner.hand.size(); i++) {
 			Card knownC = this.partner.hand.get(i);
 			Card c = this.truePartnerHand.get(i);
-			if(knownC.value == -1) {
+			if (knownC.value == -1) {
 				values.set(c.value - 1, values.get(c.value - 1) + 1);
 			}
 		}
@@ -455,23 +402,31 @@ public class Player {
 		return values.indexOf(Collections.max(values)) + 1;
 	}
 
-	private boolean partnerCanConfidentlyPlay() throws Exception {
-		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+	private int getMaxNumColorHints() throws Exception {
+		ArrayList<Integer> colors = new ArrayList<>(Collections.nCopies(5, 0));
+
+		for (int i = 0; i < this.partner.hand.size(); i++) {
+			Card knownC = this.partner.hand.get(i);
 			Card c = this.truePartnerHand.get(i);
-			if (this.cardIsPlayable(c) && (this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1)) {
-				return true;
+			if (knownC.color == -1) {
+				colors.set(c.color, colors.get(c.color) + 1);
 			}
 		}
-		return false;
+
+		return Collections.max(colors);
 	}
 
-	private int getPartnerConfidentPlayIndex() throws Exception {
-		for (int i = 0; i < this.truePartnerHand.size(); i++) {
+	private int getMaxNumValueHints() throws Exception {
+		ArrayList<Integer> values = new ArrayList<>(Collections.nCopies(5, 0));
+
+		for (int i = 0; i < this.partner.hand.size(); i++) {
+			Card knownC = this.partner.hand.get(i);
 			Card c = this.truePartnerHand.get(i);
-			if (this.cardIsPlayable(c) && (this.partner.hand.get(i).color == -1 || this.partner.hand.get(i).value == -1)) {
-				return i;
+			if (knownC.value == -1) {
+				values.set(c.value - 1, values.get(c.value - 1) + 1);
 			}
 		}
-		return 0; // should never get here since we check if we can confidently play before calling this method
+
+		return Collections.max(values);
 	}
 }

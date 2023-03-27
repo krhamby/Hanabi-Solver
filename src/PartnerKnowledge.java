@@ -31,8 +31,8 @@ class PartnerKnowledge {
         for (int i = 0; i < truePartnerHand.size(); i++) {
             try {
                 if (truePartnerHand.get(i).color == color) {
-                    this.hand.remove(i);
-                    this.hand.add(i, truePartnerHand.get(i));
+                    Card temp = this.hand.remove(i);
+                    this.hand.add(i, new Card(truePartnerHand.get(i).color, temp.value));
                 }
             } catch (Exception e) {
                 System.out.println("Error in updateHandColorKnowledge");
@@ -44,8 +44,8 @@ class PartnerKnowledge {
         for (int i = 0; i < truePartnerHand.size(); i++) {
             try {
                 if (truePartnerHand.get(i).value == value) {
-                    this.hand.remove(i);
-                    this.hand.add(i, truePartnerHand.get(i));
+                    Card temp = this.hand.remove(i);
+                    this.hand.add(i, new Card(temp.color, truePartnerHand.get(i).value));
                 }
             } catch (Exception e) {
                 System.out.println("Error in updateHandNumberKnowledge");
