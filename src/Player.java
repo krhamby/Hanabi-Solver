@@ -432,8 +432,8 @@ public class Player {
 			Card c = this.myHand.get(i);
 			if (cardInTableau(c)) {
 				return i;
-			} else if (c.value == 5) {
-				return i;
+			// } else if (c.value == 5) {
+			// 	return i;
 			} else if (c.color == -1 && c.value == -1) {
 				return i;
 			}
