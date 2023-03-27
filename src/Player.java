@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is the only class you should edit.
@@ -280,6 +282,14 @@ public class Player {
 				this.myHand.add(oneCardIndex, new Card(-1, -1));
 				return "PLAY " + oneCardIndex + " " + oneCardIndex;
 			}
+
+			// if that doesn't work, see if there are other good guesses we can make
+			int goodGuessCardIndex = getGoodGuessCardIndex();
+			if (goodGuessCardIndex != -1) {
+				this.myHand.remove(goodGuessCardIndex);
+				this.myHand.add(goodGuessCardIndex, new Card(-1, -1));
+				return "PLAY " + goodGuessCardIndex + " " + goodGuessCardIndex;
+			}
 		}
 
 		// if all else fails, discard the first card -1, -1 card in our hand
@@ -382,12 +392,38 @@ public class Player {
 						count++;
 					}
 				}
-				if (count > 0.5) {
+				if (count / 5 > 0.5) {
 					return i;
 				}
 			}
 		}
 		return -1;
+	}
+
+	private int getGoodGuessCardIndex() throws Exception {
+		Map<Integer, Integer> goodGuesses = new HashMap<>();
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.value != -1) {
+				int count = 0;
+				for (int j = 0; j < this.tableau.size(); j++) {
+					if (this.tableau.get(j) == c.value - 1) {
+						count++;
+					}
+				}
+				goodGuesses.put(i, Math.max(goodGuesses.getOrDefault(c.value, 0), count));
+			}
+		}
+
+		int max = 0;
+		int maxIndex = -1;
+		for (Map.Entry<Integer, Integer> entry : goodGuesses.entrySet()) {
+			if (entry.getValue() > max) {
+				max = entry.getValue();
+				maxIndex = entry.getKey();
+			}
+		}
+		return maxIndex;
 	}
 
 	// can be greatly improved
