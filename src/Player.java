@@ -447,6 +447,46 @@ public class Player {
 		}
 		return this.tableau.get(c.color) >= c.value - 1;
 	}
+
+	// private boolean isLastRemainingCard(Card c) throws Exception {
+	// 	if (c.value != -1 && c.color != -1) {
+	// 		int count = 0;
+	// 		for (int j = 0; j < this.possibleRemainingCards.size(); j++) {
+	// 			Card possibleC = this.possibleRemainingCards.get(j);
+	// 			if (possibleC.value == c.value && possibleC.color == c.color) {
+	// 				count++;
+	// 			}
+	// 		}
+	// 		switch (c.value) {
+	// 			case 1:
+	// 				if (count == 2) {
+	// 					return true;
+	// 				}
+	// 				break;
+	// 			case 2:
+	// 				if (count == 1) {
+	// 					return true;
+	// 				}
+	// 				break;
+	// 			case 3:
+	// 				if (count == 1) {
+	// 					return true;
+	// 				}
+	// 				break;
+	// 			case 4:
+	// 				if (count == 1) {
+	// 					return true;
+	// 				}
+	// 				break;
+	// 			case 5:
+	// 				if (count == 0) {
+	// 					return true;
+	// 				}
+	// 				break;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 	
 	private Hint getBestOverallHint() throws Exception {
 		int maxNumColorHints = getMaxNumColorHints();
