@@ -239,16 +239,16 @@ public class Player {
 		} else if (partnerCanConfidentlyPlay()) {
 			int idx = this.getPartnerConfidentPlayIndex();
 			Card c = this.partner.hand.get(idx);
+			Card knownCard = this.truePartnerHand.get(idx);
 			if (c.color == -1) {
-				int color = this.getMostHelpfulColor();
+				int color = knownCard.color;
 				this.partner.updateHandColorKnowledge(color, partnerHand);
 				return "COLORHINT " + color;
 			} else {
-				int number = this.getMostHelpfulNumber();
+				int number = knownCard.value;
 				this.partner.updateHandValueKnowledge(number - 1, partnerHand);
 				return "NUMBERHINT " + number;
 			}
-
 		} else if (canPlayOne() && this.numFuses > 1) {
 			int idx = this.getPlayOneIndex();
 			return "PLAY " + idx + " " + idx;
