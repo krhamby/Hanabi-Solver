@@ -231,6 +231,8 @@ public class Player {
 		// if we have a playable card (i.e. a card we can play without risk), play it
 		int playableCardIndex = getPlayableCardIndex();
 		if (playableCardIndex != -1) {
+			this.myHand.remove(playableCardIndex);
+			this.myHand.add(playableCardIndex, new Card(-1, -1));
 			return "PLAY " + playableCardIndex + " " + playableCardIndex;
 		} 
 
@@ -268,6 +270,14 @@ public class Player {
 			this.myHand.remove(discardableCardIndex);
 			this.myHand.add(discardableCardIndex, new Card(-1, -1));
 			return "DISCARD " + discardableCardIndex + " " + discardableCardIndex;
+		}
+
+		// if we know we have a one with a color we don't have on the board, play it
+		int oneCardIndex = getOneCardIndex();
+		if (oneCardIndex != -1) {
+			this.myHand.remove(oneCardIndex);
+			this.myHand.add(oneCardIndex, new Card(-1, -1));
+			return "PLAY " + oneCardIndex + " " + oneCardIndex;
 		}
 
 		// if all else fails, discard the first card in our hand
@@ -343,6 +353,25 @@ public class Player {
 							return i;
 						}
 						break;
+				}
+			}
+		}
+		return -1;
+	}
+
+	private int getOneCardIndex() throws Exception {
+		for (int i = 0; i < this.myHand.size(); i++) {
+			Card c = this.myHand.get(i);
+			if (c.value == 1) {
+				// calculate chance of success given top card in tableau
+				int count = 0;
+				for (int j = 0; j < this.tableau.size(); j++) {
+					if (this.tableau.get(j) == 0) {
+						count++;
+					}
+				}
+				if (count > 0.5) {
+					return i;
 				}
 			}
 		}
